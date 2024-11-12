@@ -54,6 +54,10 @@ class ItemAlreadyExists(Exception):
     """Error code 1002: Item with such unique property already exists or Item cannot be created according to billing restrictions"""
     pass
 
+class EncodingError(Exception):
+    """Error code 1003: Accept-encoding is not gzip."""
+    pass
+
 class LimitOfMessagesExceeded(Exception):
     """Error code 1004: Limit of messages has been exceeded"""
     pass
@@ -99,7 +103,7 @@ def validate_error(response):
         elif error_code == 3:
             raise InvalidResult
         elif error_code == 4:
-            raise InvalidInput
+            raise InvalidInput(response["reason"])
         elif error_code == 5:
             raise ErrorPerformingRequest
         elif error_code == 6:
@@ -120,6 +124,8 @@ def validate_error(response):
             raise NoMessagesForSelectedInterval
         elif error_code == 1002:
             raise ItemAlreadyExists
+        elif error_code == 1003:
+            raise EncodingError
         elif error_code == 1004:
             raise LimitOfMessagesExceeded
         elif error_code == 1005:
