@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name='wialon-sdk',
-  version='0.1.0',
+  version='0.0.1',
   packages=find_packages(),
   install_requires=[
     'requests>=2.32.3'
@@ -20,8 +20,8 @@ setup(
   url='https://github.com/tetotille/wialon-sdk',
   classifiers=[
     'Programming Language :: Python :: 3',
-    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
   ],
-  python_requires='>=3.9',
+  python_requires='>=3.8',
 )
