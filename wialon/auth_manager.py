@@ -1,9 +1,8 @@
 from errors import SessionException
-from wialon import Wialon
 
 
 class AuthManager:
-    def __init__(self,token:str,engine:Wialon):
+    def __init__(self,token:str,engine):
         self.token = token
         self.engine = engine
         self._login()
@@ -38,10 +37,3 @@ class AuthManager:
     
     def __str__(self):
         return f"name:{self.user_name}\nsid: {self.sid}"
-    
-if __name__ == "__main__":
-    wialon = Wialon("YOUR_API_URL_HERE")
-    auth = AuthManager("YOUR_API_KEY_HERE",wialon)
-    print(auth)
-    print(auth.logout())
-    auth.logout()
