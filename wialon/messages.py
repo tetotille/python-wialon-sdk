@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pandas as pd
 
-pd.DataFrame.to_sql()
 
 class Messages:
     def __init__(self, engine):
@@ -104,18 +103,18 @@ class Messages:
             Accept-encoding is not gzip.
         """
         
-        mtype = self._unit_messages[params.get("message_type","data")]
-        resource = self._resource_messages[params.get("resource","default")]
-        log = self._logs if params.get("log",False) else 0
-        message_filter = self._process_filter(params.get("message_filter",None),params.get("event_filter",None),params.get("mask_filter"))
+        mtype = self._unit_messages[kwargs.get("message_type","data")]
+        resource = self._resource_messages[kwargs.get("resource","default")]
+        log = self._logs if kwargs.get("log",False) else 0
+        message_filter = self._process_filter(kwargs.get("message_filter",None),kwargs.get("event_filter",None),kwargs.get("mask_filter"))
         svc = "messages/load_interval"
         params = {
             "itemId": item_id,
-            "timeFrom": datetime.timestamp(time_from),
-            "timeTo": datetime.timestamp(time_to),
+            "timeFrom": int(datetime.timestamp(time_from)),
+            "timeTo": int(datetime.timestamp(time_to)),
             "flags": mtype | resource | log | message_filter,
-            "flagsMask": params.get("flags_mask",0xff00),
-            "loadCount": params.get("load_count",0xffffffff),
+            "flagsMask": kwargs.get("flags_mask",0xff00),
+            "loadCount": kwargs.get("load_count",0xffffffff),
         }
         for key in list(params):
             if params[key] is None:
