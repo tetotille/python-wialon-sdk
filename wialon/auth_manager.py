@@ -1,4 +1,4 @@
-from errors import SessionException
+from .errors import SessionException
 
 
 class AuthManager:
