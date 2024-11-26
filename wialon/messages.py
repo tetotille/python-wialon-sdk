@@ -1,8 +1,6 @@
 import json
 from datetime import datetime
 
-import pandas as pd
-
 
 class Messages:
     def __init__(self, engine):
@@ -40,7 +38,11 @@ class Messages:
         
         self._logs = 0x1000
         
-    def load_interval(self,item_id:int,time_from:datetime,time_to:datetime,**kwargs):
+    def load_interval(self,
+                      item_id:int,
+                      time_from:datetime=datetime.fromtimestamp(0),
+                      time_to:datetime=datetime.fromtimestamp(4294967295),
+                      **kwargs):
         """
         Load messages for a certain interval.
 
