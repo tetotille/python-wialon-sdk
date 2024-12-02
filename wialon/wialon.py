@@ -1,7 +1,7 @@
 import json
 import requests
 
-from . import AuthManager,Items,Messages,validate_error
+from . import AuthManager,Items,Messages,Render,validate_error
 
 
 class Wialon:
@@ -12,6 +12,7 @@ class Wialon:
         self._auth = AuthManager(self._api_key,self)
         self._messages = None
         self._items = None
+        self._render = None
         
     def request(self,svc:str,params:dict={},sid:str=None,form_data=False):
         query = {
@@ -46,5 +47,11 @@ class Wialon:
         if self._messages is None:
             self._messages = Messages(self)
         return self._messages
+    
+    @property
+    def render(self):
+        if self._render is None:
+            self._render = Render(self)
+        return self._render
 
 
