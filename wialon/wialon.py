@@ -1,7 +1,7 @@
 import json
 import requests
 
-from . import AuthManager,Items,Messages,Render,validate_error
+from . import AuthManager,Exchange,Items,Messages,Render,validate_error
 
 
 class Wialon:
@@ -14,7 +14,7 @@ class Wialon:
         self._items = None
         self._render = None
         
-    def request(self,svc:str,params:dict={},sid:str=None,form_data=False):
+    def request(self,svc:str,params:dict={},sid:str=None,form_data=False,file=False):
         query = {
             "svc":svc,
         }
@@ -25,7 +25,8 @@ class Wialon:
         else:
             query["params"] = str(params).replace("'",'\"').replace('"','\"')
             response = requests.post(self._api_url,params=query)
-        response = json.loads(response.content)
+        if not file:
+            response = json.loads(response.content)
         validate_error(response)
         
         return response
@@ -35,6 +36,12 @@ class Wialon:
         if self._auth is None:
             self._auth = AuthManager(self._api_key,self)
         return self._auth
+    
+    @property
+    def exchange(self):
+        if self._exchange is None:
+            self._exchange = Exchange(self)
+        return self._exchange
     
     @property
     def items(self):
