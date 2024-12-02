@@ -10,6 +10,7 @@ class Wialon:
         self._api_key = api_key
         self.port = kwargs.get("port",443 if self._api_url.startswith("https") else 80)
         self._auth = AuthManager(self._api_key,self)
+        self._exchange = None
         self._messages = None
         self._items = None
         self._render = None
@@ -27,9 +28,11 @@ class Wialon:
             response = requests.post(self._api_url,params=query)
         if not file:
             response = json.loads(response.content)
-        validate_error(response)
+            validate_error(response)
         
-        return response
+            return response
+        else:
+            return response.content
     
     @property
     def auth(self):

@@ -32,7 +32,7 @@ class Exchange:
         svc = "exchange/export_messages"
         params={"layerName":layer_name,
 				"format":file_format,
-				"compress":compress}
+				"compress":1*compress}
         result = self._engine.request(svc,params,sid=self._engine.auth.get_sid(),file=True)
         if filepath:
             with open(filepath,"wb") as f:
@@ -64,7 +64,7 @@ class Exchange:
                 "timeFrom":int(datetime.timestamp(date_from)),
                 "timeTo":int(datetime.timestamp(date_to)),
                 "format":file_format,
-                "compress":compress}
+                "compress":1*compress}
         result = self._engine.request(svc,params,sid=self._engine.auth.get_sid(),file=True)
         if filepath:
             with open(filepath,"wb") as f:
