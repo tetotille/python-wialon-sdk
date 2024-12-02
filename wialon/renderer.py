@@ -6,7 +6,6 @@ class Render:
         self._engine = engine
 
     def create_message_layer(self,item_id:int,
-                            
                              date_from:datetime,
                              date_to:datetime,
                              trip_detector:bool=False,
@@ -63,14 +62,15 @@ class Render:
 					 "itemId":item_id,
 					 "timeFrom":int(date_from.timestamp()),
 					 "timeTo":int(date_to.timestamp()),
-					 "tripDetector":trip_detector,
+					 "tripDetector":1*trip_detector,
 					 "trackColor":track_color,
 					 "trackWidth":track_width,
-					 "arrows":arrows,
-					 "points":points,
+					 "arrows":1*arrows,
+					 "points":1*points,
 					 "pointColor":point_color,
-					 "annotations":annotations,
+					 "annotations":1*annotations,
 					 "flags":flags}
+        print(params)
         return self._engine.request(svc=svc,params=params,sid=self._engine.auth.get_sid())
 
     def remove_layer(self,name:str):
