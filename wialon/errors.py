@@ -103,7 +103,10 @@ def validate_error(response):
         elif error_code == 3:
             raise InvalidResult
         elif error_code == 4:
-            raise InvalidInput(response["reason"])
+            if "reason"in response:
+                raise InvalidInput(response["reason"])
+            else:
+                raise InvalidInput
         elif error_code == 5:
             raise ErrorPerformingRequest
         elif error_code == 6:
