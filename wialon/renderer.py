@@ -61,8 +61,8 @@ class Render:
         flags = 0x1*group_marker | 0x2*number_marker | 0x4*event_marker | 0x8*fillings | 0x10*images | 0x20*parkings | 0x40*speedings | 0x80*stops | 0x100*thefts | 0x200*video_markers
         params = {"layerName":"messages",
 					 "itemId":item_id,
-					 "timeFrom":date_from,
-					 "timeTo":date_to,
+					 "timeFrom":int(date_from.timestamp()),
+					 "timeTo":int(date_to.timestamp()),
 					 "tripDetector":trip_detector,
 					 "trackColor":track_color,
 					 "trackWidth":track_width,
