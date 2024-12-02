@@ -86,7 +86,7 @@ class Render:
         svc = "render/remove_layer"
         params = {"layerName": name}
         try:
-            self.wialon_engine.request(svc=svc,params=params,sid=self.wialon_engine.auth.get_sid())
+            self._engine.request(svc=svc,params=params,sid=self._engine.auth.get_sid())
         except InvalidInput:
             return False
         return True
