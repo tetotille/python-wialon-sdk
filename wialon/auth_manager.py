@@ -1,8 +1,9 @@
 from .errors import SessionException
+from typing import Any,Union
 
 
 class AuthManager:
-    def __init__(self,token:str,engine):
+    def __init__(self,token:str,engine:Any):
         self.token = token
         self._engine = engine
         self._login()
@@ -16,7 +17,7 @@ class AuthManager:
             "all": 0xfffffffffffffff
         }
 
-    def login(self,token):
+    def login(self,token:str):
         self.token = token
         self._login()
         
@@ -32,7 +33,7 @@ class AuthManager:
         self.user_name = response["user"]["nm"]
         self.user_id = response["user"]["id"]
 
-    def account_detail(self,detailed:bool=False):
+    def account_detail(self,detailed:Union[int,bool]=False):
         """
         Retrieve account details.
 
@@ -92,4 +93,4 @@ class AuthManager:
         return self._sid
     
     def __str__(self):
-        return f"name:{self.user_name}\nsid: {self.sid}"
+        return f"name:{self.user_name}\nsid: {self._sid}"

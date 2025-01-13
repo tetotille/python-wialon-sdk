@@ -1,8 +1,10 @@
 from datetime import datetime
 from .errors import InvalidInput
 
+from typing import Any,Optional
+
 class Items:
-    def __init__(self,engine):
+    def __init__(self,engine:Any):
         self._engine = engine
         self._items_type = {
             "hardware":"avl_hw",
@@ -14,7 +16,7 @@ class Items:
             "route": "avl_route"
         }
         
-    def search(self,id:int=None,item_type:str=None,date_from:datetime=datetime.fromtimestamp(0),date_to:datetime=datetime.fromtimestamp(4294967295),flags:int=0x1,by:str="property",**kwargs):
+    def search(self,id:Optional[int]=None,item_type:Optional[str]=None,date_from:datetime=datetime.fromtimestamp(0),date_to:datetime=datetime.fromtimestamp(4294967295),flags:int=0x1,by:str="property",**kwargs:Any):
         svc = "core/search_item"
         if by == "property":
             svc = svc + "s"
@@ -43,5 +45,6 @@ class Items:
             
         else:
             raise Exception("The 'by' or 'property' parameter must be")
-        return self._engine.request(svc, params,self._engine.auth.get_sid())    
+        result = self._engine.request(svc, params,self._engine.auth.get_sid())    
+        return result["items"]
     

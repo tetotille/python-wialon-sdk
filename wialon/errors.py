@@ -1,3 +1,5 @@
+from typing import Dict,Union
+
 class InvalidSession(Exception):
     """Error code 1: Invalid session"""
     pass
@@ -93,7 +95,7 @@ class SensorDeletingForbidden(Exception):
 class SessionException(Exception):
     """No session has been logged down and there is no sessionId"""
 
-def validate_error(response):
+def validate_error(response: Dict[str,Union[int,str]]):
     if "error" in response:
         error_code = response["error"]
         if error_code == 1:

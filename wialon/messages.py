@@ -1,9 +1,9 @@
-import json
 from datetime import datetime
 
+from typing import Any,Optional
 
 class Messages:
-    def __init__(self, engine):
+    def __init__(self, engine:Any):
         self._engine = engine
         self._unit_messages = {
             "data": 0x0,
@@ -42,7 +42,7 @@ class Messages:
                       item_id:int,
                       time_from:datetime=datetime.fromtimestamp(0),
                       time_to:datetime=datetime.fromtimestamp(4294967295),
-                      **kwargs):
+                      **kwargs:Any):
         """
         Load messages for a certain interval.
 
@@ -122,9 +122,9 @@ class Messages:
             if params[key] is None:
                 del params[key]
 
-        return self._engine.request(svc, params,self._engine.auth.get_sid())
+        return self._engine.request(svc, params,self._engine.auth.get_sid())["messages"]
 
-    def load_last(self,item_id:int,last_time:int,last_count:int,flags:int,flags_mask:int,load_count:int):
+    def load_last(self,item_id:int,last_time:int,last_count:int,flags:Optional[int],flags_mask:Optional[int],load_count:Optional[int]):
         """
         To load a few latest messages for a specified point in time.
         Args:
@@ -158,7 +158,7 @@ class Messages:
     
         return self._engine.request(svc, params,self._engine.auth.get_sid())
 
-    def _process_filter(self,message,event,mask):
+    def _process_filter(self,message:str,event:str,mask:Optional[int]) -> int:
         # TODO: create mask filter
         message_filter = 0
         if message:
