@@ -3,11 +3,13 @@ import requests
 
 from . import AuthManager,Exchange,Items,Messages,Render,validate_error
 
+from typing import Any,Dict,Optional
 
 class Wialon:
-    def __init__(self,api_url:str,api_key:str,**kwargs):
+    def __init__(self,api_url:str,api_key:str,**kwargs: Any):
         self._api_url = api_url
         self._api_key = api_key
+        self._verify_cert = kwargs.get("verify_cert",None)
         self.port = kwargs.get("port",443 if self._api_url.startswith("https") else 80)
         self._auth = AuthManager(self._api_key,self)
         self._exchange = None
@@ -15,17 +17,17 @@ class Wialon:
         self._items = None
         self._render = None
         
-    def request(self,svc:str,params:dict={},sid:str=None,form_data=False,file=False):
+    def request(self,svc:str,params:Dict[str,str]={},sid:Optional[str]=None,form_data:bool=False,file:bool=False,send_file:Optional[Dict[str, Any]]={}):
         query = {
             "svc":svc,
         }
         if sid: query["sid"] = sid
         
         if form_data:
-            response = requests.post(self._api_url,json={"params":params})
+            response = requests.post(self._api_url, json={"params": params}, files=send_file, verify=self._verify_cert)
         else:
             query["params"] = str(params).replace("'",'\"').replace('"','\"')
-            response = requests.post(self._api_url,params=query)
+            response = requests.post(self._api_url,params=query,files=send_file,verify=self._verify_cert)
         if not file:
             response = json.loads(response.content)
             validate_error(response)
@@ -36,8 +38,6 @@ class Wialon:
     
     @property
     def auth(self):
-        if self._auth is None:
-            self._auth = AuthManager(self._api_key,self)
         return self._auth
     
     @property
@@ -63,5 +63,3 @@ class Wialon:
         if self._render is None:
             self._render = Render(self)
         return self._render
-
-
