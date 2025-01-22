@@ -29,8 +29,11 @@ class Wialon:
             query["params"] = str(params).replace("'",'\"').replace('"','\"')
             response = requests.post(self._api_url,params=query,files=send_file,verify=self._verify_cert)
         if not file:
-            response = json.loads(response.content)
-            validate_error(response)
+            try:
+                response = json.loads(response.content)
+                validate_error(response)
+            except json.JSONDecodeError as e:
+                raise json.JSONDecodeError("Response is not a valid JSON, please verify the API URL.", str(e), 0)
         
             return response
         else:
