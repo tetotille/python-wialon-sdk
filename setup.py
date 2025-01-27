@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name='wialon-sdk',
-  version='0.2.4',
+  version='0.3.1',
   packages=find_packages(),
   install_requires=[
     'requests>=2.32.3'
