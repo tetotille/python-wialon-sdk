@@ -1,9 +1,9 @@
 import json
 import requests
 
-from . import AuthManager,Exchange,Items,Messages,Render,validate_error
+from . import AuthManager,Exchange,Extra,Items,Messages,Render,validate_error
 
-from typing import Any,Dict,Optional
+from typing import Any,Dict,List,Optional,Union
 
 class Wialon:
     def __init__(self,api_url:str,api_key:str,**kwargs: Any):
@@ -13,11 +13,26 @@ class Wialon:
         self.port = kwargs.get("port",443 if self._api_url.startswith("https") else 80)
         self._auth = AuthManager(self._api_key,self)
         self._exchange = None
+        self._extra = None
         self._messages = None
         self._items = None
         self._render = None
         
-    def request(self,svc:str,params:Dict[str,str]={},sid:Optional[str]=None,form_data:bool=False,file:bool=False,send_file:Optional[Dict[str, Any]]={}):
+    def request(self,svc:str,params:Union[Dict[str,str],List[Dict[str,Any]]]={},sid:Optional[str]=None,form_data:bool=False,file:bool=False,send_file:Optional[Dict[str, Any]]={}) -> Union[Dict[str,Any],List[Dict[str,Any]],bytes]:
+        """
+        Sends a request to the Wialon API.
+        Args:
+            svc (str): The service name to be requested.
+            params (Union[Dict[str, str], List[Dict[str, Any]]], optional): The parameters to be sent with the request. Defaults to {}.
+            sid (Optional[str], optional): The session ID. Defaults to None.
+            form_data (bool, optional): Whether to send the data as form data. Defaults to False.
+            file (bool, optional): Whether the response is expected to be a file. Defaults to False.
+            send_file (Optional[Dict[str, Any]], optional): The file data to be sent with the request. Defaults to {}.
+        Returns:
+            Union[Dict[str, Any], List[Dict[str, Any]], bytes]: The response from the API. If `file` is False, the response is parsed as JSON and returned as a dictionary or list. If `file` is True, the raw bytes of the response content are returned.
+        Raises:
+            json.JSONDecodeError: If the response content is not a valid JSON and `file` is False.
+        """
         query = {
             "svc":svc,
         }
@@ -48,6 +63,12 @@ class Wialon:
         if self._exchange is None:
             self._exchange = Exchange(self)
         return self._exchange
+    
+    @property
+    def extra(self):
+        if self._extra is None:
+            self._extra = Extra(self)
+        return self._extra
     
     @property
     def items(self):
