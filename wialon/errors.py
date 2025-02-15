@@ -115,6 +115,14 @@ class SessionExceptionError(Exception):
     """No session has been logged down and there is no sessionId."""
 
 
+class FormatError(Exception):
+    """Error code 2015: Invalid format. Only Exchange."""
+
+
+class NoFileReturnedError(Exception):
+    """Wheen the exchange does not return a file."""
+
+
 ERROR_CODES = {
     1: InvalidSessionError,
     2: InvalidServiceNameError,
