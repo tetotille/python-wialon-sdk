@@ -4,6 +4,7 @@ from .auth_manager import AuthManager
 from .errors import (
     FormatError,
     NoFileReturnedError,
+    ParameterError,
     SessionExceptionError,
     validate_error,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "Items",
     "Messages",
     "NoFileReturnedError",
+    "ParameterError",
     "Render",
     "SessionExceptionError",
     "Wialon",

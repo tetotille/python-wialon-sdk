@@ -123,6 +123,10 @@ class NoFileReturnedError(Exception):
     """Wheen the exchange does not return a file."""
 
 
+class ParameterError(Exception):
+    """Parameter error."""
+
+
 ERROR_CODES = {
     1: InvalidSessionError,
     2: InvalidServiceNameError,
