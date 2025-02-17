@@ -1,50 +1,128 @@
-from datetime import datetime
-from .errors import InvalidInput
+"""Items module for Wialon API."""
 
-from typing import Any,Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
+
+from .errors import InvalidInputError, InvalidResultError, ParameterError
+
+if TYPE_CHECKING:
+    from .wialon import Wialon
+
 
 class Items:
-    def __init__(self,engine:Any):
+    """Items class for Wialon API."""
+
+    def __init__(self, engine: "Wialon") -> None:
+        """__init__ method for Items class.
+
+        :param engine: Wialon object
+        :type engine: Wialon
+        """
         self._engine = engine
-        self._items_type = {
-            "hardware":"avl_hw",
-            "resource":"avl_resource",
-            "retranslator":"avl_retranslator",
+        self._items_type: dict[str, str] = {
+            "hardware": "avl_hw",
+            "resource": "avl_resource",
+            "retranslator": "avl_retranslator",
             "unit": "avl_unit",
-            "unit_group":"avl_unit_group",
+            "unit_group": "avl_unit_group",
             "user": "user",
-            "route": "avl_route"
+            "route": "avl_route",
         }
-        
-    def search(self,id:Optional[int]=None,item_type:Optional[str]=None,date_from:datetime=datetime.fromtimestamp(0),date_to:datetime=datetime.fromtimestamp(4294967295),flags:int=0x1,by:str="property",**kwargs:Any):
+
+    def search(
+        self,
+        item_id: int | None = None,
+        item_type: str | None = None,
+        date_from: datetime = datetime(1969, 12, 31, 20, 0),
+        date_to: datetime = datetime(2106, 2, 7, 3, 28, 15),
+        by: str = "property",
+        **kwargs: dict[str, int | str],
+    ) -> list[dict[str, Any]]:
+        """Search for items based on various criteria.
+
+        :param item_id: The ID of the item to search for (used when `by` is "id").
+        :type item_id: int, optional
+        :param item_type: The type of item to search for (used when `by` is "property").
+        :type item_type: str, optional
+        :param date_from: The start date for the search range (used when `by`
+        :type date_from: datetime
+                          is "property").
+        :param date_to: The end date for the search range (used when `by` is "property").
+        :type date_to: datetime
+        :param by: The search method, either "property" or "id".
+        :type by: str
+        :param kwargs: Additional search parameters.
+        :type kwargs: dict[str, int | str]
+        :return: A list of dictionaries containing the search results.
+        :rtype: list[dict[str, Any]]
+        :raises InvalidInputError: If an invalid `item_type` is provided.
+        :raises ParameterError: If required parameters are missing or invalid.
+        :raises InvalidResultError: If the search result is invalid or unexpected.
+        """
+        _flags = kwargs.get("flags", 0x1)
+        _force = kwargs.get("force", 0)
+        _prop_name = kwargs.get("prop_name", "sys_name")
+        _prop_value_mask = kwargs.get("prop_value_mask", "*")
+        _sort_type = kwargs.get("sort_by", "")
+
+        # Set the params
+        flags: int = _flags if _flags and _flags is int else 0x1
+        force: int = _force if _force and _force is int else 0
+        prop_name: str = _prop_name if _prop_name and _prop_name is str else "sys_name"
+        prop_value_mask: str = (
+            _prop_value_mask if _prop_value_mask and _prop_value_mask is str else "*"
+        )
+        sort_type = _sort_type if _sort_type and _sort_type is str else ""
+
         svc = "core/search_item"
+
+        ### By Property
         if by == "property":
             svc = svc + "s"
-            if item_type not in self._items_type.keys(): raise InvalidInput("Please send a valid 'item_type'")
-            if (item_type is None): raise Exception("For property you need the 'item_type', 'date_from' and 'date_to' parameters")
-            params = {
+            if item_type not in self._items_type:
+                msg = "Please send a valid 'item_type'"
+                raise InvalidInputError(msg)
+
+            if not item_type:
+                msg = """For property you need the 'item_type', 'date_from' and 'date_to'
+                parameters"""
+                raise ParameterError(msg)
+
+            params: dict[str, dict[str, str] | int] = {
                 "spec": {
                     "itemsType": self._items_type[item_type],
-                    "propName": kwargs.get("prop_name","sys_name"),
-                    "propValueMask": kwargs.get("prop_mask","*"),
-                    "sortType": kwargs.get("sort_by",""),
-                    # "propType": kwargs.get("prop_type","property"),
-                    # "or_logic": kwargs.get("or_logic",0),
+                    "propName": prop_name,
+                    "propValueMask": prop_value_mask,
+                    "sortType": sort_type,
                 },
-                "force": kwargs.get("force",0),
+                "force": force,
                 "flags": flags,
                 "from": int(datetime.timestamp(date_from)),
-                "to": int(datetime.timestamp(date_to))
+                "to": int(datetime.timestamp(date_to)),
             }
-        elif by=="id":
-            if id is None: raise Exception("The ID parameter must enter")
+
+        ### By ID
+        elif by == "id":
+            if not item_id:
+                msg = "The item_id parameter must enter"
+                raise ParameterError(msg)
             params = {
-                "id":id,
-                "flags":flags
-            }   
-            
+                "id": item_id,
+                "flags": flags,
+            }
+
         else:
-            raise Exception("The 'by' or 'property' parameter must be")
-        result = self._engine.request(svc, params,self._engine.auth.get_sid())    
-        return result["items"]
-    
+            msg = "The 'by' or 'property' parameter must be"
+            raise ParameterError(msg)
+        result = self._engine.request(svc, params, self._engine.auth.get_sid())
+        if not result:
+            msg = "No data found"
+            raise InvalidResultError(msg)
+
+        if isinstance(result, dict):
+            result = result["items"]
+        elif isinstance(result, bytes):
+            msg = "Unexpected bytes response"
+            raise InvalidResultError(msg)
+
+        return result

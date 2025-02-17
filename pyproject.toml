@@ -1,0 +1,24 @@
+[tool.ruff]
+line-length = 90 # You can change it according to your preference
+target-version = "py312" # Adjust according to your Python version
+select = [
+    "ALL", # Enables all available rules
+]
+ignore = [
+    "D203",   # Optional: Avoid conflicts between D203 and D211 in docstrings
+    "D213",   # Optional: For consistent docstring styles
+    "DTZ001", # Optional: Avoid conflicts between DTZ001 and DTZ002
+    "DTZ006", # Optional: Avoid conflicts between DTZ006 and DTZ007
+]
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double" # Prefers double quotes in docstrings
+
+[tool.ruff.pydocstyle]
+convention = "google" # Or "numpy", if you prefer that style
+
+[tool.ruff.mccabe]
+max-complexity = 10 # Adjust according to the allowed complexity in functions
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101"] # Allows the use of `assert` in tests

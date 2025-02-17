@@ -1,99 +1,168 @@
-from datetime import datetime
-from typing import Any, Optional
+"""This module contains the Exchange class.
 
-class FormatException(Exception):
-    """Error code 2015: Invalid format"""
-    pass
+Which provides methods for importing and exporting messages from Wialon.
+"""
+
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from wialon.errors import FormatError, NoFileReturnedError
+
+if TYPE_CHECKING:
+    from .wialon import Wialon
+
 
 class Exchange:
-    def __init__(self,engine:Any):
-        self._engine = engine
-        self._formats = ["txt","kml","plt","wln","wlb"]
+    """The Exchange class.
 
-    def import_messages(self,unit_id:int,filepath:str,event_hash:Optional[str]=None):
+    Provides methods for importing and exporting messages from Wialon.
+    """
+
+    def __init__(self, engine: "Wialon") -> None:
+        """Initialize the Exchange class.
+
+        :param engine: The Wialon engine.
+        :type engine: Wialon
         """
-        Import messages for a specific unit from a file.
+        self._engine = engine
+        self._formats = ["txt", "kml", "plt", "wln", "wlb"]
 
-        Args:
-            unit_id (int): The ID of the unit to import messages for.
-            filepath (str): The path to the file containing the messages to import.
-            event_hash (str, optional): A hash of the event. Defaults to None.
+    def import_messages(
+        self,
+        unit_id: int,
+        filepath: str,
+        event_hash: str | None = None,
+    ) -> dict[str, Any] | list[dict[str, Any]] | bytes:
+        """Import messages to a unit.
 
-        Returns:
-            dict: The result of the import operation.
+        :param unit_id: The ID of the unit to import messages to.
+        :type unit_id: int
+        :param filepath: The path to the file containing the messages to import.
+        :type filepath: str
+        :param event_hash: Event Hash, defaults to None
+        :type event_hash: str | None, optional
+        :return: The response from the Wialon API.
+        :rtype: dict[str, Any] | list[dict[str, Any]] | bytes
         """
         svc = "exchange/import_messages"
-        params = {
-            "itemId":unit_id,
-            "eventHash":event_hash
-        }
-        with open(filepath,"rb") as f:
-            files = {
-                "upload_file": f
+        if event_hash is None:
+            params: dict[str, int | str] = {
+                "itemId": unit_id,
             }
-            response = self._engine.request(svc,params,sid=self._engine.auth.get_sid(),send_file=files)
-        return response
-    
-    def export_messages_by_layer(self,layer_name:str,file_format:str,filepath:Optional[str]=None,compress:bool=False):
+        else:
+            params: dict[str, int | str] = {
+                "itemId": unit_id,
+                "eventHash": event_hash,
+            }
+        path: Path = Path(filepath)
+        with Path.open(path, "rb") as file:
+            files = {
+                "upload_file": file,
+            }
+            return self._engine.request(
+                svc,
+                params,
+                sid=self._engine.auth.get_sid(),
+                send_file=files,
+            )
+
+    def export_messages_by_layer(
+        self,
+        layer_name: str,
+        file_format: str,
+        filepath: str | None = None,
+        *,
+        compress: bool = False,
+    ) -> bytes:
+        """Export messages by layer name.
+
+        :param layer_name: The name of the layer to export messages from.
+        :type layer_name: str
+        :param file_format: The format of the exported file. Must be one of the
+        :type file_format: str
+                            supported formats.
+        :param filepath: The path to save the exported file. If None, the result is
+        :type filepath: str | None, optional
+                         returned without saving to a file, defaults to None.
+        :param compress: Whether to compress the exported file, defaults to False
+        :type compress: bool, optional
+        :raises FormatError: If the provided file format is not supported.
+        :return: The result of the export operation.
+        :rtype: str
         """
-        Export messages by layer.
-
-        This method exports messages from a specified layer in a given format and optionally saves them to a file.
-
-        Args:
-            layer_name (str): The name of the layer to export messages from.
-            file_format (str): The format to export the messages in. Must be one of the supported formats.
-            filepath (str, optional): The path to save the exported messages to. If not provided, the messages will not be saved to a file.
-            compress (bool, optional): Whether to compress the exported messages. Defaults to False.
-
-        Returns:
-            bytes: The exported messages in the specified format.
-
-        Raises:
-            FormatException: If the provided file_format is not supported.
-        """
-        if file_format not in self._formats: raise FormatException("Invalid format")
+        if file_format not in self._formats:
+            msg = "Invalid format"
+            raise FormatError(msg)
 
         svc = "exchange/export_messages"
-        params={"layerName":layer_name,
-				"format":file_format,
-				"compress":1*compress}
-        result = self._engine.request(svc,params,sid=self._engine.auth.get_sid(),file=True)
-        if filepath:
-            with open(filepath,"wb") as f:
+        params = {
+            "layerName": layer_name,
+            "format": file_format,
+            "compress": 1 * compress,
+        }
+        result = self._engine.request(
+            svc,
+            params,
+            sid=self._engine.auth.get_sid(),
+            file=True,
+        )
+        if filepath and result is bytes:
+            path: Path = Path(filepath)
+            with Path.open(path, "wb") as f:
                 f.write(result)
-        return result
-    
-    def export_messages_by_id(self,unit_id:int,date_from:datetime,date_to:datetime,file_format:str,filepath:Optional[str]=None,compress:bool=False):
+            return result
+        if result is bytes:
+            return result
+        msg = "No file returned"
+        raise NoFileReturnedError(msg)
+
+    def export_messages_by_id(
+        self,
+        unit_id: int,
+        date_from: datetime,
+        date_to: datetime,
+        file_format: str,
+        **kwargs: dict[str, str | bool],
+    ) -> bytes:
+        """Export messages by unit ID.
+
+        :param unit_id: The ID of the unit to export messages from.
+        :type unit_id: int
+        :param date_from: The start date of the messages to export.
+        :type date_from: datetime
+        :param date_to: The end date of the messages to export.
+        :type date_to: datetime
+        :param file_format: The format of the exported file.
+        :type file_format: str
+                            Must be one of the supported formats.
+        :raises FormatError: If the provided file format is not supported.
+        :return: The result of the export operation.
+        :rtype: bytes
         """
-        Export messages for a specific unit within a given time range.
-
-        Args:
-            unit_id (int): The ID of the unit to export messages for.
-            date_from (datetime): The start date and time for the export range.
-            date_to (datetime): The end date and time for the export range.
-            file_format (str): The format of the exported file. Must be one of the supported formats.
-            filepath (str, optional): The path to save the exported file. If None, the result is returned without saving to a file. Defaults to None.
-            compress (bool, optional): Whether to compress the exported file. Defaults to False.
-
-        Raises:
-            FormatException: If the provided file format is not supported.
-
-        Returns:
-            bytes: The exported messages in the specified format.
-        """
-        if file_format not in self._formats: raise FormatException("Invalid format")
+        filepath = kwargs.get("filepath")
+        compress = kwargs.get("compress", False)
+        if file_format not in self._formats:
+            msg = "Invalid file format"
+            raise FormatError(msg)
 
         svc = "exchange/export_messages"
-        params={"itemId":unit_id,
-                "timeFrom":int(datetime.timestamp(date_from)),
-                "timeTo":int(datetime.timestamp(date_to)),
-                "format":file_format,
-                "compress":1*compress}
-        result = self._engine.request(svc,params,sid=self._engine.auth.get_sid(),file=True)
-        if filepath:
-            with open(filepath,"wb") as f:
+        params = {
+            "itemId": unit_id,
+            "timeFrom": int(datetime.timestamp(date_from)),
+            "timeTo": int(datetime.timestamp(date_to)),
+            "format": file_format,
+            "compress": 1 if compress else 0,
+        }
+        result = self._engine.request(
+            svc,
+            params,
+            sid=self._engine.auth.get_sid(),
+            file=True,
+        )
+        if filepath is str and result is bytes:
+            path: Path = Path(filepath)
+            with Path.open(path) as f:
                 f.write(result)
-        return result
-
-
+            return result
+        return b""
