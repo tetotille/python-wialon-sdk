@@ -1,7 +1,8 @@
 # 🚀 Wialon SDK
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c7748bd584ca463d82fd94154b8d7716)](https://app.codacy.com/gh/tetotille/python-wialon-sdk/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Lint and Type Check](https://github.com/tetotille/python-wialon-sdk/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/tetotille/python-wialon-sdk/actions/workflows/python-package.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c7748bd584ca463d82fd94154b8d7716)](https://app.codacy.com/gh/tetotille/python-wialon-sdk/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
 ## 📋 Index
 
