@@ -62,7 +62,7 @@ class AuthManager:
         )
 
         self.host = response["host"]
-        if response["eid"] is str:
+        if isinstance(response["eid"], str):
             self._sid: str = response["eid"]
         self.api_type = response["api"]
         self.version = response[f"{self.api_type}_version"]
