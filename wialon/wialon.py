@@ -174,3 +174,20 @@ class Wialon:
         if self._render is None:
             self._render = Render(self)
         return self._render
+
+    def __str__(self) -> str:
+        """Return the string representation of the Wialon object."""
+        return f""" Wialon API Client
+                    API URL: {self._api_url}
+                    API Key: {self._api_key}
+                    Verify Cert: {self._verify_cert}
+                    Port: {self.port}
+
+                    Auth: {self._auth}
+                    Exchange: {self._exchange}
+                    Extra: {self._extra}
+                    Items: {self._items}
+                    Messages: {self._messages}
+                    Render: {self._render}
+
+                    """
