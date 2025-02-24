@@ -21,7 +21,6 @@ class AuthManager:
         """
         self.token = token
         self._engine = engine
-        self._login()
         self._access_types = {
             "general": 0xFFFF,
             "units": 0xCCF7F00000,
@@ -37,6 +36,7 @@ class AuthManager:
         self.version = None
         self.user_name = None
         self.user_id = None
+        self._login()
 
     def login(self, token: str) -> None:
         """Login to the Wialon API.
