@@ -107,12 +107,12 @@ class Exchange:
             sid=self._engine.auth.get_sid(),
             file=True,
         )
-        if filepath and result is bytes:
+        if filepath and isinstance(result,bytes):
             path: Path = Path(filepath)
             with Path.open(path, "wb") as f:
                 f.write(result)
             return result
-        if result is bytes:
+        if isinstance(result,bytes):
             return result
         msg = "No file returned"
         raise NoFileReturnedError(msg)
