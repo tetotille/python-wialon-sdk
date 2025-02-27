@@ -5,7 +5,16 @@ from typing import Any
 
 import requests
 
-from . import AuthManager, Exchange, Extra, Items, Messages, Render, validate_error
+from . import (
+    AuthManager,
+    Exchange,
+    Extra,
+    Items,
+    Messages,
+    Render,
+    Report,
+    validate_error,
+)
 
 
 class Wialon:
@@ -35,6 +44,7 @@ class Wialon:
         self._messages = None
         self._items = None
         self._render = None
+        self._report = None
 
     def request(
         self,
@@ -174,6 +184,17 @@ class Wialon:
         if self._render is None:
             self._render = Render(self)
         return self._render
+
+    @property
+    def report(self) -> Report:
+        """Return the Report instance.
+
+        :return: the Report instance
+        :rtype: Report
+        """
+        if self._report is None:
+            self._report = Report(self)
+        return self._report
 
     def __str__(self) -> str:
         """Return the string representation of the Wialon object."""

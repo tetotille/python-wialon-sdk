@@ -13,6 +13,7 @@ from .extra import Extra
 from .items import Items
 from .messages import Messages
 from .renderer import Render
+from .report import Report
 from .wialon import Wialon
 
 __all__ = [
@@ -25,6 +26,7 @@ __all__ = [
     "NoFileReturnedError",
     "ParameterError",
     "Render",
+    "Report",
     "SessionExceptionError",
     "Wialon",
     "validate_error",
