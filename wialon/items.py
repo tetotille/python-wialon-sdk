@@ -66,13 +66,16 @@ class Items:
         _sort_type = kwargs.get("sort_by", "")
 
         # Set the params
-        flags: int = _flags if _flags and _flags is int else 0x1
-        force: int = _force if _force and _force is int else 0
-        prop_name: str = _prop_name if _prop_name and _prop_name is str else "sys_name"
-        prop_value_mask: str = (
-            _prop_value_mask if _prop_value_mask and _prop_value_mask is str else "*"
+        flags: int = _flags if _flags and isinstance(_flags, int) else 0x1
+        force: int = _force if _force and isinstance(_force, int) else 0
+        prop_name: str = (
+            _prop_name if _prop_name and isinstance(_prop_name, str) else "sys_name"
         )
-        sort_type = _sort_type if _sort_type and _sort_type is str else ""
+        prop_value_mask: str = (
+            _prop_value_mask if _prop_value_mask and isinstance(_prop_value_mask, str)
+            else "*"
+        )
+        sort_type = _sort_type if _sort_type and isinstance(_sort_type, str) else ""
 
         svc = "core/search_item"
 
