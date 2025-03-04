@@ -36,7 +36,7 @@ class Items:
         date_from: datetime = datetime(1969, 12, 31, 20, 0),
         date_to: datetime = datetime(2106, 2, 7, 3, 28, 15),
         by: str = "property",
-        **kwargs: dict[str, int | str],
+        **kwargs: int | str,
     ) -> list[dict[str, Any]]:
         """Search for items based on various criteria.
 
