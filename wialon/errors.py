@@ -1,6 +1,9 @@
 """Errors for Wialon API."""
 
 
+from typing import Any
+
+
 class InvalidSessionError(Exception):
     """Error code 1: Invalid session."""
 
@@ -154,7 +157,7 @@ ERROR_CODES = {
 }
 
 
-def validate_error(response: dict[str, int | str]) -> None:
+def validate_error(response: dict[str, int | str]|list[dict[str,Any]]) -> None:
     """Validate error in response.
 
     :param response: Response from Wialon API.
@@ -201,6 +204,9 @@ def validate_error(response: dict[str, int | str]) -> None:
     :raises SessionExceptionError: No session has been logged down and there is no
                                    sessionId.
     """
+    if isinstance(response, list):
+        [validate_error(item) for item in response]
+        return
     error_code = response.get("error")
     if error_code is None:
         return
