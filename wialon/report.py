@@ -3,6 +3,8 @@ from datetime import datetime
 from time import sleep
 from typing import TYPE_CHECKING, Any
 
+from loguru import logger
+
 if TYPE_CHECKING:
     from .wialon import Wialon
 
@@ -40,7 +42,7 @@ class Report:
         }
         self._pages_sizes = ["a4","a3","legal","letter"]
 
-    def get_result(self) -> dict[str,Any]:
+    def apply_result(self) -> dict[str,Any]:
         """Retrieve the report result.
 
         :raises ValueError: If the report result cannot be retrieved.
@@ -53,16 +55,110 @@ class Report:
                                         params=params,
                                         sid=self._engine.auth.get_sid())
         if isinstance(response, dict):
+            logger.info("Report result applied.")
             self._has_result = True
             return response
+
+        logger.error("The request response is not dict")
+        logger.debug(f"Request: {params}, Response: {response}")
         msg = "Failed to retrieve report result."
         raise ValueError(msg)
+
+    def get_result(self,
+                   table_index:int=0,
+                   index_from:int=0,
+                   index_to:int=0,
+                   **kwargs:bool) -> list[dict[str,Any]]:
+        """Obtain the report result.
+
+        :param table_index: The index of the previous execution table, defaults to 0
+        :type table_index: int, optional
+        :param index_from: The index of the row from where it will be taken into account,
+        :type index_from: int, optional
+        defaults to 0
+        :param index_to: The index to the row that will be taken into account,
+        :type index_to: int, optional
+        defaults to 0
+        :param multi_level: The indicator of whether the sub -levels must be recovered,
+        :type multi_level: bool, optional
+        defaults to False
+        :raises ValueError: If the report result cannot be recovered.
+        :return: The result of the report.
+        :rtype: dict[str,Any]
+        """
+        if not self._has_result:
+            logger.error("No report result to retrieve. First generate a report.")
+            msg = "No report result to retrieve. First generate a report."
+            raise BufferError(msg)
+
+        multi_level = kwargs.get("multi_level", False)
+
+        svc = "report/get_result_rows"
+        params = {
+            "tableIndex": table_index,
+            "indexFrom": index_from,
+            "indexTo": index_to,
+        }
+        response = self._engine.request(svc=svc,
+                                        params=params,
+                                        sid=self._engine.auth.get_sid())
+
+        if not isinstance(response, list):
+            logger.error("The request response is not dict")
+            logger.debug(f"Request: {params}, Response: {response}")
+            msg = "Failed to retrieve report result."
+            raise TypeError(msg)
+
+        if multi_level:
+            return self._get_sub_rows(table_index, list(range(index_from, index_to)))
+
+        return response
+
+    def _get_sub_rows(self,
+                      table_index:int,
+                      row_index:int|list[int],
+                      ) -> list[dict[str,Any]]:
+        """Retrieve the sub rows of a report.
+
+        :param int table_index: The table index.
+        :param int row_index: The row index.
+        :return: The sub rows of the report.
+        :rtype: list[dict[str,Any]]|list[list[dict[str,Any]]]
+        """
+        if isinstance(row_index, int):
+            svc = "report/get_result_subrows"
+            params = {
+                "tableIndex": table_index,
+                "rowIndex": row_index,
+            }
+            response = self._engine.request(svc=svc,
+                                        params=params,
+                                        sid=self._engine.auth.get_sid())
+            if isinstance(response, list):
+                return response
+            logger.error("The request response is not list")
+            logger.debug(f"Request: {params}, Response: {response}")
+            msg = "Failed to retrieve sub rows."
+            raise ValueError(msg)
+
+        params = [{"svc": "report/get_result_subrows",
+                   "params": {"tableIndex": table_index,
+                              "rowIndex": x}} for x in row_index]
+
+        response = self._engine.extra.batch(params)
+
+        return [
+                item
+                for sublist in response
+                for item in sublist
+                if isinstance(item, dict)
+            ]
 
     def execute(self,
                 object_id:int|list[int],
                 resource_id:int,
                 template_id:int,
-                **kwargs:datetime|int|str) -> str|dict[str,Any]:
+                **kwargs:datetime|int|str) -> str|dict[str,Any] :
         """Execute a report.
 
         :param int|list[int] object_id: Object ID or list of object IDs.
@@ -81,6 +177,10 @@ class Report:
         :return: The dict with the report results.
         :rtype: dict[str,Any]
         """
+        logger.info("Executing report.")
+        logger.debug(f"""Object ID: {object_id},
+                     Resource ID: {resource_id},
+                     Template ID: {template_id}""")
         # Get extra params
         now = datetime.now()
         date_from = kwargs.get("date_from",
@@ -143,6 +243,7 @@ class Report:
             "remoteExec": 1 if remote_exec else 0,
             "reportTemplate": report_template,
         }
+        logger.debug(f"Request: {params}")
 
         # Request and results
         response = self._engine.request(svc=svc,
@@ -156,13 +257,14 @@ class Report:
 
                 # Wait for the report to be generated
                 if not async_wait:
-                    sleep(.5)
                     response = self.status()
-                    done = 4
+                    done = "4"
                     while response["code"] != done:
-                        sleep(.5)
                         response = self.status()
-                    return self.get_result()
+                        logger.info(f"Waiting status: {response}")
+                    response = self.apply_result()
+                    logger.debug(response)
+                    return response
 
                 return "Report is being generated."
         msg = "Report generation failed."
@@ -282,14 +384,16 @@ class Report:
         :return: The report status.
         :rtype: dict[str,str]
         """
+        sleep(2)
         svc = "report/get_report_status"
         params = {}
         response = self._engine.request(svc=svc,
                                       params=params,
                                       sid=self._engine.auth.get_sid())
         if isinstance(response, dict) and "status" in response:
+            code = int(response["status"])
             return {"code":response["status"],
-                    "result":self._statuses[response["status"]]}
+                    "result":self._statuses[code]}
         msg = "Failed to retrieve report status."
         raise ValueError(msg)
 
