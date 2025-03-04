@@ -1,9 +1,11 @@
 """The main module for the Wialon API client."""
 
 import json
+from pathlib import Path
 from typing import Any
 
 import requests
+from loguru import logger
 
 from . import (
     AuthManager,
@@ -45,11 +47,18 @@ class Wialon:
         self._items = None
         self._render = None
         self._report = None
+        self._logging = kwargs.get("logging", "")
+        if self._logging == "INFO":
+            logger.add(Path.cwd() / "wialon.log", rotation="100 MB", level="INFO")
+        if self._logging == "DEBUG":
+            logger.add(Path.cwd() / "wialon.log", rotation="100 MB", level="DEBUG")
+        logger.info("Wialon API client initialized.")
 
     def request(
         self,
         svc: str,
         params: dict[str, str]
+        | dict[str, int]
         | dict[str, str | int]
         | dict[str, dict[str, str] | int]
         | dict[str, int | dict[str, int]]
@@ -109,7 +118,11 @@ class Wialon:
         if not file_upload:
             try:
                 response = json.loads(response.content)
-                validate_error(response)
+                if isinstance(response, list):
+                    for item in response:
+                        validate_error(item)
+                else:
+                    validate_error(response)
             except json.JSONDecodeError as exc:
                 msg = "Response is not a valid JSON, please verify the API URL."
                 raise json.JSONDecodeError(
