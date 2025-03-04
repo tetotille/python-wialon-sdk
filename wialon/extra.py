@@ -18,7 +18,9 @@ class Extra:
         """
         self._engine = engine
 
-    def batch(self, params: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def batch(self,
+              params: list[dict[str, Any]],
+              ) -> list[dict[str, Any]]|list[list[dict[str,Any]]]:
         """Perform a batch request.
 
         Parameters
