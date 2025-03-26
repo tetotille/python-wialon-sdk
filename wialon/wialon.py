@@ -68,7 +68,7 @@ class Wialon:
         | None = None,
         sid: str | None = None,
         send_file: dict[str, Any] | None = None,
-        **kwargs: bool | str,
+        **kwargs: bool | str | int,
     ) -> dict[str, Any] | list[dict[str, Any]] | bytes:
         """Make a request to the Wialon API.
 
@@ -89,6 +89,8 @@ class Wialon:
         """
         _form_data = kwargs.get("form_data", False)
         _file = kwargs.get("file", False)
+        _timeout = kwargs.get("timeout", 30)
+        timeout = _timeout if isinstance(_timeout, int) else 30
         form_data = _form_data if isinstance(_form_data, bool) else False
         file_upload = _file if isinstance(_file, bool) else False
 
@@ -104,7 +106,7 @@ class Wialon:
                 json={"params": params},
                 files=send_file,
                 verify=self._verify_cert,
-                timeout=30,
+                timeout=timeout,
             )
         else:
             query["params"] = str(params).replace("'", '"').replace('"', '"')
@@ -113,7 +115,7 @@ class Wialon:
                 params=query,
                 files=send_file,
                 verify=self._verify_cert,
-                timeout=30,
+                timeout=timeout,
             )
         if not file_upload:
             try:
