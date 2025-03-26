@@ -57,7 +57,7 @@ class Messages:
         item_id: int,
         time_from: datetime = datetime(1969, 12, 31, 20, 0),
         time_to: datetime = datetime(2106, 2, 7, 3, 28, 15),
-        **kwargs: dict[str, int | str | bool],
+        **kwargs: int | str | bool,
     ) -> dict[str, Any]:
         """Load messages for a given item within a specified time interval.
 
