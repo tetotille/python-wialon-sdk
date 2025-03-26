@@ -1,6 +1,6 @@
 """Items module for Wialon API."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from .errors import InvalidInputError, InvalidResultError, ParameterError
@@ -33,11 +33,11 @@ class Items:
         self,
         item_id: int | None = None,
         item_type: str | None = None,
-        date_from: datetime = datetime(1969, 12, 31, 20, 0),
-        date_to: datetime = datetime(2106, 2, 7, 3, 28, 15),
+        date_from: datetime = datetime(1970, 1, 1, 0, 0, tzinfo=UTC),
+        date_to: datetime = datetime(2106, 2, 7, 3, 28, 15, tzinfo=UTC),
         by: str = "property",
         **kwargs: int | str,
-    ) -> list[dict[str, Any]]:
+    ) -> dict[str, Any] | list[dict[str, Any]] | bytes:
         """Search for items based on various criteria.
 
         :param item_id: The ID of the item to search for (used when `by` is "id").
