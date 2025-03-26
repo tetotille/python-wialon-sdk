@@ -3,6 +3,12 @@
 from typing import TYPE_CHECKING, Any
 from typing import Any as Wialon
 
+from wialon.errors import (
+    InvalidInputError,
+    ReachedLimitOfConcurrentRequestsError,
+    UnknownError,
+)
+
 if TYPE_CHECKING:
     from . import Wialon
 
@@ -33,11 +39,22 @@ class Extra:
         list of dict
             The results of each request in the batch.
         """
-        response = self._engine.request(
-            "core/batch",
-            params,
-            self._engine.auth.get_sid(),
-        )
+        try:
+            response = self._engine.request(
+                "core/batch",
+                params,
+                self._engine.auth.get_sid(),
+                timeout=60*5,
+            )
+        except UnknownError as exc:
+            msg = "The returned result is too large."
+            raise ValueError(msg) from exc
+        except InvalidInputError as exc:
+            msg = "Wrong input parameters."
+            raise InvalidInputError(msg) from exc
+        except ReachedLimitOfConcurrentRequestsError as exc:
+            msg = "The flag is 1 and have 1 error in one of the requests."
+            raise ReachedLimitOfConcurrentRequestsError(msg) from exc
 
         if not isinstance(response, list):
             msg = "Invalid response from the server."
