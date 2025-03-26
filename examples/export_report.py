@@ -24,7 +24,6 @@ if __name__ == "__main__":
                         sort_type="avl_resource",
                         flags=0x1+0x2000)
 
-
     reports = next(x for x in resources if x.get("nm") == user_name)
     _resource_id = reports.get("id")
     resource_id = (
