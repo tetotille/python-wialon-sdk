@@ -50,10 +50,6 @@ class Unit:
             return self.id == other.id
         return False
 
-    def __hash__(self) -> str:
-        """__hash__. Hash function."""
-        return hash(self.name)
-
 
 class Units:
     """Units Class."""
