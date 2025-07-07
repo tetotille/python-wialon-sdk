@@ -20,7 +20,6 @@ wialon = Wialon(url, api_key)
 
 items = wialon.items.search(by="property", item_type="unit")
 
-# ruff: noqa
 for item in items:
     print("-----------------------------------")
     print(item["nm"].upper())
