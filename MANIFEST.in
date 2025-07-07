@@ -1,0 +1,16 @@
+# Incluir el README y la licencia
+include README.md
+include LICENSE
+
+# Incluir archivos de configuración
+include pyproject.toml
+include requirements.txt
+
+# Incluir todos los archivos fuente del paquete
+recursive-include wialon *.py
+
+# Incluir ejemplos (opcional, pero útil para usuarios)
+recursive-include examples *.py
+
+# Incluir archivos en la raíz que puedan ser útiles
+global-include *.md
