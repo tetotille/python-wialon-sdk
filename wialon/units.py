@@ -49,6 +49,9 @@ class Unit:
         if isinstance(other, Unit):
             return self.id == other.id
         return False
+    
+    def __hash__(self):
+        return hash(self.name)
 
 
 class Units:
